@@ -73,7 +73,8 @@ An AI-native Digital Twin platform delivering real-time system monitoring, inter
 <summary><b>⏪ Predicting the Past — Data Replay</b></summary>
 <br>
 
-- Replays historical 3D system behavior to uncover hidden patterns, inefficiencies, and gradual mechanical drift.
+- **JSON Data Persistence:** Stores previous AI agent instruction configurations securely in a local JSON database (`ai_history.json`).
+- **History Replay:** Allows playback and visualization of previous task commands to analyze how the system derived logic over time and uncover inefficiencies.
 </details>
 
 <details open>
@@ -107,6 +108,7 @@ An AI-native Digital Twin platform delivering real-time system monitoring, inter
 ### ⚙️ Backend
 - **Framework:** FastAPI (Python)
 - **Server:** Uvicorn (ASGI web server)
+- **Database Storage:** Local JSON-based NoSQL (`ai_history.json`) functioning as a lightweight data persistence engine for history and AI replays.
 - **Communication:**
   - **WebSockets:** Used for real-time bidirectional teleop control and streaming video feeds from the Android/Mobile camera to the dashboard.
   - **UDP Sockets:** Used for fast, low-latency streaming of servo coordinates directly to the hardware.
