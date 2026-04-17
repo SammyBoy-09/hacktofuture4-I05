@@ -388,7 +388,7 @@ export function ReplicateTwinScene({
         </div>
       ) : null}
 
-      <Canvas camera={{ position: [3.2, 2, 3.8], fov: 58 }}>
+      <Canvas camera={{ position: [4.8, 3.0, 5.7], fov: 58 }}>
         <color attach='background' args={['#ffffff']} />
         <ambientLight intensity={isCameraTwin ? 0.95 : 0.8} />
         <directionalLight position={[3, 3, 2]} intensity={1.1} />

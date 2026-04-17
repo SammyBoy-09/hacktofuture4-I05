@@ -9,6 +9,7 @@ const tabOptions = [
   { id: 'monitor', label: 'Monitor Movements' },
   { id: 'replicate', label: 'Replicate On Real Gripper' },
   { id: 'agent', label: 'AI Agent Command' },
+  { id: 'replay', label: 'Replay Past' },
 ]
 
 const JOINT_LIMITS = {
@@ -48,6 +49,19 @@ export function MachineDetailPage() {
   const [agentPlan, setAgentPlan] = useState(null)
   const [approvalState, setApprovalState] = useState('awaiting')
   const [sequenceTime, setSequenceTime] = useState(1)
+  const [aiHistory, setAiHistory] = useState([])
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null)
+  const [replayAngles, setReplayAngles] = useState(INITIAL_JOINT_ANGLES)
+
+  // Fetch AI History when in replay tab
+  useEffect(() => {
+    if (activeTab === 'replay') {
+      fetch('http://localhost:8000/api/ai-history')
+        .then(res => res.json())
+        .then(data => setAiHistory(data.history || []))
+        .catch(err => console.error('Failed to load history', err))
+    }
+  }, [activeTab])
   const [sequenceLoop, setSequenceLoop] = useState(1)
 
   // Teleoperation WebSocket
@@ -248,6 +262,50 @@ export function MachineDetailPage() {
     }
   }
 
+  const executePlanFast = async (historyPlan) => {
+    setApprovalState('executing')
+    loopExecutingRef.current = true
+
+    try {
+      // Start sending to real machine in the background
+      fetch('http://localhost:8000/api/execute-movement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sequence_time: sequenceTime, sequence: historyPlan }),
+      }).catch(e => console.error('BG execution failed:', e))
+
+      // Simulate visually on the 3D model
+      if (historyPlan && historyPlan.steps) {
+        for (const step of historyPlan.steps) {
+          if (!loopExecutingRef.current) break
+
+          // Convert backend variables to frontend UI variables (same ratio logic)
+          const targetBody = step.body_tilt - 90
+          const targetArm =  -step.gripper_angle
+
+          setReplayAngles({
+            body: targetBody,
+            'r-arm': targetArm
+          })
+
+          // Wait sequence time for visual representation
+          await new Promise(r => setTimeout(r, sequenceTime * 1000))
+        }
+      }
+    } catch (error) {
+      console.error('Execution failed:', error)
+    } finally {
+      loopExecutingRef.current = false
+      setApprovalState('completed')
+      
+      // Auto reset 3D avatar 2 seconds after sequence completes
+      setTimeout(() => {
+        setReplayAngles(INITIAL_JOINT_ANGLES)
+        setApprovalState('awaiting')
+      }, 2000)
+    }
+  }
+
   const handleCancelLoop = () => {
     loopExecutingRef.current = false
     setApprovalState('canceled')
@@ -286,6 +344,55 @@ export function MachineDetailPage() {
             </button>
           ))}
         </nav>
+
+        {activeTab === 'replay' && (
+          <div className='grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)]'>
+            <ReplicateTwinScene heightClass='h-[620px]' placement={INITIAL_REPLICATE_PLACEMENT} jointAngles={replayAngles} />
+            <div className='space-y-6'>
+              <div className='rounded-2xl border border-slate-200 bg-slate-50 p-5'>
+                <h2 className='text-lg font-semibold text-slate-900'>Past AI Actions</h2>
+                <div className='mt-4 flex flex-col gap-3 max-h-[500px] overflow-y-auto'>
+                  {aiHistory.map((item, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`relative rounded-xl border p-4 transition cursor-pointer ${selectedHistoryItem === item ? 'border-cyan-600 bg-cyan-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                      onClick={() => setSelectedHistoryItem(item)}
+                    >
+                      <button 
+                        className="absolute right-3 top-3 text-slate-400 hover:text-cyan-700"
+                        title="View JSON"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          alert(JSON.stringify(item, null, 2))
+                        }}
+                      >
+                        ⓘ
+                      </button>
+                      <h3 className='font-bold text-slate-800 pr-6'>{item.task_name}</h3>
+                      <p className='text-xs text-slate-500 mt-1'>
+                        {new Date(item.generated_at).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                  {aiHistory.length === 0 && (
+                    <p className="text-sm text-slate-500 italic">No past AI actions found.</p>
+                  )}
+                </div>
+              </div>
+              
+              {selectedHistoryItem && (
+                <button
+                  type='button'
+                  onClick={() => executePlanFast(selectedHistoryItem)}
+                  disabled={approvalState === 'executing'}
+                  className='w-full rounded-xl bg-cyan-600 px-6 py-4 font-bold text-white shadow-sm transition hover:bg-cyan-700 disabled:opacity-50'
+                >
+                  {approvalState === 'executing' ? 'Replaying...' : 'Replay Selected Action'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {activeTab === 'monitor' && (
           <div className='grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)]'>

@@ -1,0 +1,85 @@
+[
+    {
+        "task_name": "Demo Fallback Task (Rate Limit)",
+        "generated_at": "2026-04-17T06:48:40.430099",
+        "steps": [
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 0,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 85,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 0,
+                "body_tilt": 90
+            }
+        ]
+    },
+    {
+        "task_name": "pick a box",
+        "generated_at": "2026-04-17T06:00:40.430099",
+        "steps": [
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 0,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 85,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 85,
+                "body_tilt": 40
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 10,
+                "body_tilt": 40
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 10,
+                "body_tilt": 90
+            }
+        ]
+    },
+    {
+        "task_name": "Drop the box",
+        "generated_at": "2026-04-17T06:30:40.430099",
+        "steps": [
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 10,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 10,
+                "body_tilt": 40
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 85,
+                "body_tilt": 40
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 85,
+                "body_tilt": 90
+            },
+            {
+                "action_type": "actuate_joints",
+                "gripper_angle": 0,
+                "body_tilt": 90
+            }
+        ]
+    }
+]

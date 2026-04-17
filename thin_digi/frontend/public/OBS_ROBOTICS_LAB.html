@@ -95,6 +95,21 @@
             background: #00e8e8;
             transform: translateY(-2px);
         }
+        #arsenal-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none; /* hidden until max scroll */
+            gap: 20px;
+            z-index: 100;
+        }
+        #arsenal-nav button {
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #1a1a1a;
+        }
     </style>
 
     <script type="importmap">
@@ -108,8 +123,12 @@
     </script>
 </head>
 <body>
-    
     <button id="back-to-dashboard" onclick="window.top.location.href='/'">Back to Dashboard</button>
+
+    <div id="arsenal-nav">
+        <button id="prev-part">&larr; Previous</button>
+        <button id="next-part">Next &rarr;</button>
+    </div>
 
     <div id="loading">Loading Model...</div>
     <div id="scroll-indicator">Scroll down to inspect &darr;</div>
@@ -123,9 +142,9 @@
         // --- CONFIGURATION VARIABLES ---
         // Tweak these values (in radians) to change the initial rotation of the model. 
         // e.g. Math.PI = 180 degrees, Math.PI / 2 = 90 degrees
-        const MODEL_ROTATION_X = 0;
-        const MODEL_ROTATION_Y = Math.PI / 2; // Set to 0, Math.PI, Math.PI/2, etc. to find the perfect front view
-        const MODEL_ROTATION_Z = 0;
+        const MODEL_ROTATION_X = Math.PI ; // 90 degrees on the X-axis
+        const MODEL_ROTATION_Y = Math.PI / 2.5; // Rotate around so it faces the camera
+        const MODEL_ROTATION_Z = Math.PI ; // Adjust Z to bring the gripper front
         // -------------------------------
 
         // 1. Scene Setup
@@ -137,33 +156,39 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2; // Bumped exposure to make colors pop brighter
+        renderer.toneMappingExposure = 1.0; 
         document.body.appendChild(renderer.domElement);
 
         // Add OrbitControls so you can pan around the model
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Lighting - Enhanced Studio environment for max vibrancy
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.5); // Very bright ambient
+        // Lighting - Fix the black model by using DirectionalLights instead of just point lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Safe ambient
         scene.add(ambientLight);
 
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe0e0e0, 2.5); 
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0); 
         hemiLight.position.set(0, 50, 0);
         scene.add(hemiLight);
 
-        // Surrounding Point Lights to highlight every small crevice
-        const pointLight1 = new THREE.PointLight(0xffffff, 30, 50);
-        pointLight1.position.set(5, 5, 5);
-        scene.add(pointLight1);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 3.0);
+        dirLight.position.set(5, 10, 10);
+        scene.add(dirLight);
+        
+        const dirLight2 = new THREE.DirectionalLight(0xffffff, 2.0);
+        dirLight2.position.set(-5, -5, -5);
+        scene.add(dirLight2);
 
-        const pointLight2 = new THREE.PointLight(0xffffff, 30, 50);
-        pointLight2.position.set(-5, 0, 5);
-        scene.add(pointLight2);
-
-        const pointLight3 = new THREE.PointLight(0xffaaaa, 20, 50); // Slight warm back fill
-        pointLight3.position.set(0, 5, -5);
-        scene.add(pointLight3);
+        // Label Container
+        const labelContainer = document.createElement('div');
+        labelContainer.style.position = 'fixed';
+        labelContainer.style.top = '0';
+        labelContainer.style.left = '0';
+        labelContainer.style.width = '100vw';
+        labelContainer.style.height = '100vh';
+        labelContainer.style.pointerEvents = 'none';
+        labelContainer.style.zIndex = '50';
+        document.body.appendChild(labelContainer);
 
         // 2. Load the Model
         let modelParts = [];
@@ -186,12 +211,48 @@
             scene.add(model);
 
             // Extract parts and store initial states
+            const excludeTokens = [
+                '014','074','073','072','071','070','067','069','068','066','065','064',
+                '025','041','042','043','044','045','046','047','048','049','050','051',
+                '052','053','054','055','056','057','058','019','075','088',
+                '32_2','32_3','plane-1','Plane-1','21_2','021_2'
+            ];
+
             model.traverse((child) => {
                 if (child.isMesh) {
+                    // Check if part should be excluded to reduce clutter
+                    const isExcluded = excludeTokens.some(token => child.name.includes(token) || child.name.toLowerCase().includes(token.toLowerCase()));
+                    if (isExcluded) {
+                        child.visible = false;
+                        return; // Skip adding to animation pipeline
+                    }
+
                     // Clone the position/rotation so we have a permanent record of the original state
                     child.userData.originalPosition = child.position.clone();
                     child.userData.originalRotation = child.rotation.clone();
                     modelParts.push(child);
+
+                    // Create Label
+                    const label = document.createElement('div');
+                    label.innerText = child.name || 'Component';
+                    label.style.position = 'absolute';
+                    label.style.color = '#fff';
+                    label.style.background = 'rgba(0, 200, 200, 0.85)';
+                    label.style.padding = '4px 10px';
+                    label.style.borderRadius = '20px';
+                    label.style.fontSize = '12px';
+                    label.style.fontWeight = 'bold';
+                    label.style.opacity = '0';
+                    label.style.transition = 'opacity 0.3s ease';
+                    label.style.transform = 'translate(-50%, 25px)'; // Shifted down 25px below part
+                    label.style.boxShadow = '0 2px 8px rgba(0,0,0,0.5)';
+                    labelContainer.appendChild(label);
+                    child.userData.labelElement = label;
+                    
+                    // Clone emissive map for highlighting
+                    if (child.material) {
+                        child.userData.originalEmissive = child.material.emissive ? child.material.emissive.clone() : new THREE.Color(0x000000);
+                    }
                 }
             });
 
@@ -206,32 +267,67 @@
             // CREATE A MASTER EXPLOSION TIMELINE
             explosionTimeline = anime.timeline({
                 autoplay: false, 
-                duration: 6000, // Very slow educational progression
+                duration: 6000, 
                 easing: 'linear' 
             });
 
-            const spreadDistance = 3.5; // Enough distance for pieces to slide completely off the main body
-            
+            // Grid variables for the "arsenal" layout
+            const cols = 4; // 4 columns
+            const spacingX = 4.0; // Widened significantly to keep parts separated
+            const spacingY = 4.0; 
+            const startX = -((cols - 1) * spacingX) / 2;
+            const startY = ((Math.ceil(modelParts.length / cols) - 1) * spacingY) / 2 - 1.5; // Offset slightly down
+
             // Loop through sorted parts to add sequenced animations
             modelParts.forEach((part, index) => {
-                // Delay between parts (e.g., outer parts fly off well before inner parts start)
-                const startTimeOffset = index * 400; // VERY slow, methodical sequenced stagger
+                const startTimeOffset = index * 100; // Faster stagger so user isnt scrolling forever
                 
-                const dirX = part.userData.originalPosition.x;
-                const dirY = part.userData.originalPosition.y;
-                const dirZ = part.userData.originalPosition.z;
+                // Calculate grid position
+                const col = index % cols;
+                const row = Math.floor(index / cols);
 
-                // Push outwards laterally on its local Z axis (which visually is left/right to us now)
-                const offsetMultiplier = Math.sign(dirZ || 1); 
+                // Because the master model is rotated X=90 and Y=180:
+                // World X (left/right) is Local -X
+                // World Y (up/down) is Local Z
+                // World Z (forward/back) is Local -Y
+                
+                let targetWorldX = startX + (col * spacingX);
+                let targetWorldY = startY - (row * spacingY);
 
-                // Add clean, precise sideway movement
+                // Manual Overrides: Stack these specific parts vertically in order
+                if (part.name.includes('Plane036')) {
+                    targetWorldX = -8.0; // Try X-axis offset
+                    targetWorldY = 0.0;
+                } else if (part.name.includes('Plane039')) {
+                    targetWorldX = 0.0;
+                    targetWorldY = 0.0;
+                } else if (part.name.includes('Plane037')) {
+                    targetWorldX = 8.0;
+                    targetWorldY = 0.0;
+                }
+
+                const targetLocalX = -targetWorldX;
+                const targetLocalY = -2.0; // Pull it forward toward the camera
+                const targetLocalZ = targetWorldY;
+
+                // Add clean, precise sideway movement to a grid position
                 explosionTimeline.add({
                     targets: part.position,
-                    z: dirZ + (offsetMultiplier * spreadDistance) + (dirZ * spreadDistance * 0.4), 
-                    y: dirY + (modelParts.length - index) * 0.05, // Gentle lift so parts don't intersect
-                    x: dirX + (dirX * 0.2), // Minimal forward/back drift
-                    duration: 3500, // Extremely slow individual part transition
-                    easing: 'easeInOutSine' 
+                    x: targetLocalX,
+                    y: targetLocalY,
+                    z: targetLocalZ,
+                    duration: 3000, 
+                    easing: 'easeInOutCubic' 
+                }, startTimeOffset);
+                
+                // Also rotate parts to a neutral orientation so we can see them clearly like an arsenal
+                explosionTimeline.add({
+                    targets: part.rotation,
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                    duration: 3000,
+                    easing: 'easeInOutCubic'
                 }, startTimeOffset);
             });
 
@@ -245,18 +341,49 @@
         let targetProgress = 0; // Value between 0 (assembled) and 1 (dismantled)
         let activeProgress = 0; // Current lerped value
         
+        let currentFocusIndex = 0;
+        
+        // Navigation Buttons
+        document.getElementById('next-part').addEventListener('click', () => {
+            if (modelParts.length > 0) {
+                currentFocusIndex = (currentFocusIndex + 1) % modelParts.length;
+            }
+        });
+        
+        document.getElementById('prev-part').addEventListener('click', () => {
+            if (modelParts.length > 0) {
+                currentFocusIndex = (currentFocusIndex - 1 + modelParts.length) % modelParts.length;
+            }
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('arsenal-nav').style.display === 'flex') {
+                if (e.key === 'ArrowRight') document.getElementById('next-part').click();
+                if (e.key === 'ArrowLeft') document.getElementById('prev-part').click();
+            }
+        });
+
         // Map scroll position to disassembly Level instead of mouse distance
         window.addEventListener('scroll', () => {
             if (!explosionTimeline) return;
 
             const scrollPos = window.scrollY;
             
-            // Calculate total scrollable height. (The full body height minus what we currently see)
+            // Calculate total scrollable height
             const maxScroll = document.body.scrollHeight - window.innerHeight;
             
             // Clamp it between 0.0 (top) and 1.0 (bottom of page)
             const scrollPercentage = scrollPos / maxScroll;
             targetProgress = Math.max(0, Math.min(1, scrollPercentage));
+            
+            // Toggle Arsenal mode Navigation UI when fully scrolled
+            if (targetProgress >= 0.99) {
+                document.getElementById('arsenal-nav').style.display = 'flex';
+                document.getElementById('scroll-indicator').style.display = 'none';
+            } else {
+                document.getElementById('arsenal-nav').style.display = 'none';
+                document.getElementById('scroll-indicator').style.display = 'block';
+            }
         });
 
         // 4. Render Loop & Window Resizing
@@ -268,17 +395,87 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Required for damping
+            
+            const time = Date.now() * 0.002;
             
             // Lerp active progress smoothly towards target progress based on scroll distance
             if (explosionTimeline) {
-                // Keep the smooth inertial drag to reduce raw scrolling jumpiness
                 activeProgress += (targetProgress - activeProgress) * 0.05;
-                
-                // Scrub the anime.js timeline
                 explosionTimeline.seek(activeProgress * explosionTimeline.duration);
+
+                if (targetProgress >= 0.99 && modelParts.length > 0) {
+                    const focusedPart = modelParts[currentFocusIndex];
+                    if (focusedPart) {
+                        // Apply procedural float and spin safely
+                        focusedPart.rotation.y += 0.01; // Constant slow spin
+                        // Calculate ideal camera position (offset from the part for zoom)
+                        const offset = new THREE.Vector3(0, 1.5, 8.0); // Pushed back significantly and angled down 
+
+                        // Camera follow logic
+                        const targetPos = new THREE.Vector3();
+                        focusedPart.getWorldPosition(targetPos);
+                        
+                        // Lerp camera and controls for smooth transition
+                        controls.target.lerp(targetPos, 0.08); // Pan looking at the target
+                        
+                        const idealCameraPos = targetPos.clone().add(offset);
+                        camera.position.lerp(idealCameraPos, 0.08); // Zoom smoothly
+                    }
+                } else if (targetProgress < 0.95 && activeProgress < 0.95) {
+                    // Reset camera to default wide overview when scrolling back up
+                    controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.05);
+                    camera.position.lerp(new THREE.Vector3(0, 2, 7), 0.05);
+                }
+
+                // Update Labels and Highlights based on Arsenal state
+                modelParts.forEach((part, idx) => {
+                    const el = part.userData.labelElement;
+                    if (!el) return;
+
+                    let shouldShowLabel = false;
+                    
+                    if (targetProgress >= 0.99) {
+                        // At maximum scroll - Arsenal Interaction Mode
+                        if (idx === currentFocusIndex) {
+                            shouldShowLabel = true;
+                            if (part.material) part.material.emissive = new THREE.Color(0x007777); // Give it a glowing cyan outline
+                        } else {
+                            if (part.material && part.userData.originalEmissive) {
+                                part.material.emissive = part.userData.originalEmissive;
+                            }
+                        }
+                    } else {
+                        // While scrolling, hide all labels and reset emissions
+                        shouldShowLabel = false;
+                        if (part.material && part.userData.originalEmissive) {
+                            part.material.emissive = part.userData.originalEmissive;
+                        }
+                    }
+
+                    // Display Logic
+                    if (shouldShowLabel) {
+                        el.style.opacity = '1';
+                        
+                        const vector = new THREE.Vector3();
+                        part.getWorldPosition(vector);
+                        vector.project(camera);
+                        
+                        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                        const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+                        
+                        if (vector.z < 1) {
+                            el.style.left = `${x}px`;
+                            el.style.top = `${y}px`;
+                        } else {
+                            el.style.opacity = '0';
+                        }
+                    } else {
+                        el.style.opacity = '0';
+                    }
+                });
             }
 
+            controls.update(); // MUST be called after shifting controls.target
             renderer.render(scene, camera);
         }
         animate();

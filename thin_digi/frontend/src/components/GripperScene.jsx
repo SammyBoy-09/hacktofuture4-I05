@@ -18,7 +18,7 @@ function GripperModel() {
   }, [scene])
 
   return (
-    <group scale={0.9} rotation={[0, 0, 0]} position={modelPosition}>
+    <group scale={0.9} rotation={[0, Math.PI / 4, 0]} position={modelPosition}>
       <primitive object={clonedScene} />
     </group>
   )
@@ -36,7 +36,7 @@ function SceneFallback() {
 export function GripperScene({ heightClass = 'h-[460px]' }) {
   return (
     <div className={`${heightClass} w-full overflow-hidden rounded-2xl border border-slate-200 bg-white`}>
-      <Canvas camera={{ position: [3.2, 2, 3.8], fov: 58 }}>
+      <Canvas camera={{ position: [4.8, 3.0, 5.7], fov: 58 }}>
         <color attach='background' args={['#ffffff']} />
         <ambientLight intensity={0.8} />
         <directionalLight position={[3, 3, 2]} intensity={1.2} />

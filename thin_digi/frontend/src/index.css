@@ -314,8 +314,8 @@ pre.bg-slate-900 {
 
 .theme-toggle-btn {
   position: fixed;
-  top: 14px;
-  right: 16px;
+  top: 17px;
+  right: 3rem;
   z-index: 1200;
   border: 1px solid var(--obs-border);
   background: var(--obs-white-panel);

@@ -3,6 +3,7 @@ import json
 import socket
 import time
 import base64
+import os
 import cv2
 import math
 import numpy as np
@@ -10,7 +11,7 @@ from ultralytics import YOLO
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, Dict, Any
 from pydantic import BaseModel
 from agent import generate_robot_instruction
 
@@ -513,11 +514,38 @@ async def plan_movement(request: UserRequest):
     # Generates the sequential plan
     sequence_json = generate_robot_instruction(request.prompt)
     
+    # Store JSON history
+    history_file = "ai_history.json"
+    history = []
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r") as f:
+                history = json.load(f)
+        except Exception:
+            pass
+            
+    history.insert(0, sequence_json.dict()) # Insert at beginning (newest first)
+    
+    with open(history_file, "w") as f:
+        json.dump(history, f, indent=4)
+    
     return {
         "status": "success", 
         "sequence": sequence_json,
         "sequence_time": request.sequence_time
     }
+
+@app.get("/api/ai-history")
+async def get_ai_history():
+    history_file = "ai_history.json"
+    history = []
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r") as f:
+                history = json.load(f)
+        except Exception:
+            pass
+    return {"history": history}
 
 @app.post("/api/execute-movement")
 async def execute_movement(request: ExecuteRequest):

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal, List, Optional
+from datetime import datetime
 
 class RobotStep(BaseModel):
     action_type: Literal["verify_vision", "actuate_joints"] = Field(...)
@@ -10,4 +11,5 @@ class RobotStep(BaseModel):
 
 class RoboticSequence(BaseModel):
     task_name: str = Field(...)
+    generated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     steps: List[RobotStep] = Field(...)
