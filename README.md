@@ -134,11 +134,11 @@ This project is divided into multiple coordinated systems. Follow these instruct
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/Obsidian-SMP/thin_digi.git
-cd thin_digi
+cd Digi-Twin
 ```
 
 ### 2. Backend Setup (FastAPI & AI)
-Ensure you have Python 3.10+ installed and run these commands from the `thin_digi` folder.
+Ensure you have Python 3.10+ installed and run these commands from the `Digi-Twin` folder.
 ```bash
 cd backend
 python -m venv venv
@@ -160,7 +160,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 ### 3. Frontend Setup (React Dashboard)
-Open a new terminal, navigate to the `thin_digi` folder, and run:
+Open a new terminal, navigate to the `Digi-Twin` folder, and run:
 ```bash
 cd frontend
 npm install
