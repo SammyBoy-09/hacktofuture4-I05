@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obsidian — AI Digital Twin Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06090f;--surface:#0b1120;--card:#0f1829;--card2:#131f35;
+  --border:#1e2d48;--text:#d0dcee;--muted:#6a82a0;
+  --teal:#00c8c8;--teal2:#00e8e8;--teal3:rgba(0,200,200,.12);
+  --edu:#7b5fff;--edu-dim:rgba(123,95,255,.12);
+  --ind:#00c8c8;--ind-dim:rgba(0,200,200,.12);
+  --teal-glow:0 0 20px rgba(0,200,200,.3),0 0 40px rgba(0,200,200,.12);
+  --nav-bg:rgba(6,9,15,.9)
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
+
+nav{position:fixed;top:0;width:100%;z-index:100;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 3rem;display:flex;justify-content:space-between;align-items:center;height:64px}
+.logo{font-size:1.1rem;font-weight:900;letter-spacing:.28em;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.logo-mark{width:28px;height:28px;border:1.5px solid var(--teal);transform:rotate(45deg);display:flex;align-items:center;justify-content:center}
+.logo-inner{width:10px;height:10px;background:var(--teal)}
+.nav-links{display:flex;gap:1.8rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--teal)}
+.btn-nav{padding:.42rem 1.2rem;border-radius:2px;border:1px solid var(--teal);color:var(--teal);background:transparent;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
+.btn-nav:hover{background:var(--teal);color:var(--bg)}
+.btn-nav.fill{background:var(--teal);color:var(--bg);margin-left:.4rem}
+.btn-nav.fill:hover{background:var(--teal2)}
+.theme-toggle{padding:.42rem 1rem;border-radius:20px;border:1px solid var(--border);color:var(--text);background:var(--card);cursor:pointer;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.theme-toggle:hover{border-color:var(--teal);color:var(--teal)}
+
+body[data-theme='light']{
+  --bg:#eef4fb;--surface:#ffffff;--card:#f8fbff;--card2:#edf3fb;
+  --border:#cbd8e8;--text:#12263f;--muted:#55708e;
+  --teal:#008f9a;--teal2:#00aebb;--teal3:rgba(0,143,154,.12);
+  --edu:#6a4ce7;--edu-dim:rgba(106,76,231,.12);
+  --ind:#008f9a;--ind-dim:rgba(0,143,154,.12);
+  --teal-glow:0 0 20px rgba(0,143,154,.2),0 0 40px rgba(0,143,154,.08);
+  --nav-bg:rgba(255,255,255,.92)
+}
+
+body[data-theme='light'] .logo,
+body[data-theme='light'] .hero-title,
+body[data-theme='light'] .sec-title,
+body[data-theme='light'] .ov-title,
+body[data-theme='light'] .chal-body h3,
+body[data-theme='light'] .cap-body h3,
+body[data-theme='light'] .flow-step h3,
+body[data-theme='light'] .h-num,
+body[data-theme='light'] .i-num,
+body[data-theme='light'] .t-name,
+body[data-theme='light'] .form-box h3,
+body[data-theme='light'] .f-logo {
+  color: #12263f;
+  text-shadow: none;
+}
+
+/* HERO */
+#hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;position:relative;overflow:hidden;padding-top:64px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 15% 50%,rgba(123,95,255,.08) 0%,transparent 55%),radial-gradient(ellipse at 80% 50%,rgba(0,120,150,.08) 0%,transparent 55%)}
+.hero-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,200,200,.012) 2px,rgba(0,200,200,.012) 4px);pointer-events:none}
+.hero-text{position:relative;z-index:2;padding:4rem 2rem 4rem 4rem}
+.hero-eyebrow{display:flex;align-items:center;gap:.6rem;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--teal);margin-bottom:1.4rem;font-weight:700}
+.eyebrow-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.hero-title{font-size:clamp(2.4rem,4.5vw,3.9rem);font-weight:800;color:#fff;line-height:1.05;margin-bottom:1.6rem;letter-spacing:-.02em}
+.hero-title em{font-style:normal;color:var(--teal);text-shadow:0 0 40px rgba(0,200,200,.4)}
+.hero-title .edu-em{font-style:normal;color:var(--edu);text-shadow:0 0 40px rgba(123,95,255,.4)}
+.hero-desc{color:var(--muted);font-size:.93rem;line-height:1.85;margin-bottom:2.2rem;max-width:480px}
+.hero-dual{display:flex;gap:.8rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.dual-badge{padding:.4rem 1rem;border-radius:2px;font-size:.75rem;font-weight:700;letter-spacing:.05em;display:flex;align-items:center;gap:.5rem}
+.dual-badge.edu{border:1px solid var(--edu);color:var(--edu);background:var(--edu-dim)}
+.dual-badge.ind{border:1px solid var(--teal);color:var(--teal);background:var(--teal3)}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn-p{padding:.82rem 2rem;border-radius:2px;background:var(--teal);color:var(--bg);border:none;cursor:pointer;font-size:.9rem;font-weight:700;text-decoration:none;display:inline-block;transition:all .2s;box-shadow:var(--teal-glow)}
+.btn-p:hover{background:var(--teal2);transform:translateY(-2px)}
+.btn-g{padding:.82rem 2rem;border-radius:2px;border:1px solid var(--border);color:var(--text);background:transparent;cursor:pointer;font-size:.9rem;font-weight:600;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.h-stat{background:var(--card);border:1px solid var(--border);border-top:2px solid var(--teal);padding:1rem;border-radius:3px}
+.h-stat.edu-stat{border-top-color:var(--edu)}
+.h-num{font-size:1.7rem;font-weight:800;color:#fff;line-height:1}
+.h-lbl{font-size:.72rem;color:var(--muted);margin-top:.3rem;line-height:1.4}
+
+.hero-visual{position:relative;z-index:2;height:100%;min-height:90vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+/* TICKER */
+.ticker-wrap{background:var(--teal);padding:.5rem 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-flex;animation:tick 35s linear infinite}
+.ticker-item{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--bg);padding:0 2rem}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+.sec{padding:5.5rem 4rem;max-width:1240px;margin:0 auto}
+.sec-label{display:flex;align-items:center;gap:.6rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:.9rem}
+.sec-label::before{content:'';width:20px;height:1px;background:var(--teal)}
+.sec-label.edu-label{color:var(--edu)}
+.sec-label.edu-label::before{background:var(--edu)}
+.sec-title{font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:1rem;letter-spacing:-.01em}
+.sec-sub{color:var(--muted);font-size:.93rem;line-height:1.8;max-width:620px;margin-bottom:3rem}
+.divider{height:1px;background:var(--border)}
+
+/* OVERVIEW */
+.ov-wrap{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.ov-inner{max-width:1240px;margin:0 auto;padding:5rem 4rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.ov-label{display:flex;align-items:center;gap:.6rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:.9rem}
+.ov-label::before{content:'';width:20px;height:1px;background:var(--teal)}
+.ov-title{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:800;color:#fff;line-height:1.2;margin-bottom:1rem}
+.ov-text p{color:var(--muted);font-size:.92rem;line-height:1.85;margin-bottom:1.2rem}
+.ov-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.pill{padding:.28rem .85rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.pill.teal{border:1px solid var(--teal);color:var(--teal)}
+.pill.edu{border:1px solid var(--edu);color:var(--edu)}
+
+/* DUAL SECTOR SPLIT */
+.dual-split{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:3rem}
+.sector-card{border-radius:4px;padding:2rem;border:1px solid var(--border)}
+.sector-card.edu-card{background:linear-gradient(135deg,rgba(123,95,255,.06),rgba(123,95,255,.02));border-color:rgba(123,95,255,.25)}
+.sector-card.ind-card{background:linear-gradient(135deg,rgba(0,200,200,.06),rgba(0,200,200,.02));border-color:rgba(0,200,200,.2)}
+.sector-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.sector-icon{width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.sector-icon.edu-icon{background:rgba(123,95,255,.15);color:var(--edu)}
+.sector-icon.ind-icon{background:rgba(0,200,200,.12);color:var(--teal)}
+.sector-head h3{font-size:.95rem;font-weight:700;color:#fff}
+.sector-head span{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sector-head span.edu-tag{color:var(--edu)}
+.sector-head span.ind-tag{color:var(--teal)}
+.sector-list{list-style:none}
+.sector-list li{padding:.45rem 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:.85rem;line-height:1.5;display:flex;align-items:flex-start;gap:.6rem}
+.sector-list li:last-child{border-bottom:none}
+.sector-list li::before{content:'?';color:var(--teal);font-size:.8rem;flex-shrink:0;margin-top:1px}
+.sector-list.edu-list li::before{color:var(--edu)}
+
+/* CHALLENGE GRID */
+.chal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.chal-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+.chal-card:hover{transform:translateY(-6px);box-shadow:0 0 30px rgba(0,200,200,.1)}
+.chal-card.edu-chal:hover{border-color:var(--edu);box-shadow:0 0 30px rgba(123,95,255,.12)}
+.chal-card.ind-chal:hover{border-color:var(--teal)}
+.chal-img{height:150px;overflow:hidden}
+.chal-img svg{width:100%;height:100%}
+.chal-body{padding:1.4rem}
+.chal-num{font-size:.68rem;font-weight:700;letter-spacing:.15em;margin-bottom:.5rem}
+.chal-num.edu-num{color:var(--edu)}
+.chal-num.ind-num{color:var(--teal)}
+.chal-body h3{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.4rem}
+.chal-body p{color:var(--muted);font-size:.81rem;line-height:1.6}
+
+/* SECTOR DIVIDER LABEL */
+.sector-divider{display:flex;align-items:center;gap:1rem;margin:3.5rem 0 2rem}
+.sector-divider::before,.sector-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.sd-badge{padding:.35rem 1.2rem;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.sd-badge.edu{background:rgba(123,95,255,.12);border:1px solid rgba(123,95,255,.3);color:var(--edu)}
+.sd-badge.ind{background:rgba(0,200,200,.1);border:1px solid rgba(0,200,200,.25);color:var(--teal)}
+
+/* CAPABILITIES */
+.cap-section-label{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;cursor:pointer}
+.cap-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sector-block{width:200px;height:200px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font-size:1.2rem;font-weight:700;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:2rem;padding:2.8rem 1rem 1rem;line-height:1.2;position:relative}
+.sector-block.edu-sector{background:linear-gradient(135deg,rgba(123,95,255,.2),rgba(123,95,255,.1));border:2px solid var(--edu);color:var(--edu)}
+.sector-block.ind-sector{background:linear-gradient(135deg,rgba(0,200,200,.2),rgba(0,200,200,.1));border:2px solid var(--teal);color:var(--teal)}
+.sector-block:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,0,0,.2)}
+.sector-container{display:flex;justify-content:center;gap:2rem;margin-bottom:3rem}
+.sector-block.coming-soon-sector{background:linear-gradient(135deg,rgba(255,160,48,.12),rgba(255,160,48,.06));border:2px solid rgba(255,160,48,.5);color:#ffa030;justify-content:center;padding:1rem}
+.sector-block.coming-soon-sector:hover{transform:none;box-shadow:none}
+.sector-click-hint{position:absolute;left:50%;bottom:3.6rem;transform:translateX(-50%);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.38;color:currentColor;white-space:nowrap}
+.sector-block:hover .sector-click-hint,.sector-click-hint:hover{text-decoration:underline;text-underline-offset:3px}
+.csl-badge{padding:.4rem 1.2rem;border-radius:20px;font-size:1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.csl-badge.edu{background:rgba(123,95,255,.12);border:1px solid rgba(123,95,255,.35);color:var(--edu)}
+.csl-badge.ind{background:rgba(0,200,200,.1);border:1px solid rgba(0,200,200,.3);color:var(--teal)}
+.csl-badge.soon{background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.3);color:#ffa030}
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2.5rem}
+.cap-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;position:relative;transition:transform .38s,box-shadow .38s,border-color .38s;cursor:pointer}
+.cap-card:hover{transform:translateY(-8px) scale(1.02)}
+.cap-card.edu-cap:hover{box-shadow:0 0 50px rgba(123,95,255,.2);border-color:var(--edu)}
+.cap-card.ind-cap:hover{box-shadow:0 0 50px rgba(0,200,200,.18);border-color:var(--teal)}
+.cap-card.soon-cap{opacity:.72;cursor:default}
+.cap-card.soon-cap:hover{transform:none;box-shadow:none;border-color:rgba(255,160,0,.25)}
+.cap-img{height:155px;overflow:hidden}
+.cap-img svg{width:100%;height:100%}
+.cap-body{padding:1.4rem}
+.cap-body h3{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.4rem}
+.cap-body p{color:var(--muted);font-size:.81rem;line-height:1.6}
+.soon-banner{position:absolute;top:12px;right:12px;padding:.22rem .7rem;background:rgba(255,160,0,.12);border:1px solid rgba(255,160,0,.3);border-radius:20px;font-size:.68rem;font-weight:700;color:#ffa030;letter-spacing:.05em}
+.cap-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:2rem;opacity:0;transform:translateY(16px);transition:opacity .35s,transform .35s;z-index:2}
+.cap-card.edu-cap .cap-overlay{background:linear-gradient(160deg,rgba(60,30,160,.97),rgba(40,20,120,.98))}
+.cap-card.ind-cap .cap-overlay{background:linear-gradient(160deg,rgba(0,90,100,.97),rgba(0,50,80,.98))}
+.cap-card:not(.soon-cap):hover .cap-overlay{opacity:1;transform:translateY(0)}
+.cap-overlay h4{color:#fff;font-size:1rem;font-weight:700;margin-bottom:.6rem}
+.cap-overlay p{color:rgba(255,255,255,.82);font-size:.83rem;line-height:1.65;margin-bottom:1rem}
+.cap-tag{display:inline-block;padding:.25rem .8rem;border:1px solid rgba(255,255,255,.3);border-radius:20px;color:#fff;font-size:.72rem;font-weight:600}
+
+/* FLOW */
+.flow-wrap{display:grid;grid-template-columns:repeat(3,1fr);position:relative;margin-top:3rem}
+.flow-connector{position:absolute;top:50px;left:calc(33.33% - 12px);right:calc(33.33% - 12px);height:1px;background:linear-gradient(90deg,var(--teal),var(--teal2));opacity:.35;z-index:0}
+.flow-step{padding:2.5rem 2rem;text-align:center;position:relative;z-index:1;border:1px solid transparent;border-radius:6px;transition:all .35s;cursor:default}
+.flow-step:hover{background:var(--card);border-color:var(--teal);box-shadow:0 0 40px rgba(0,200,200,.08)}
+.flow-circle{width:100px;height:100px;border-radius:50%;border:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;position:relative;z-index:2;transition:all .35s;overflow:hidden}
+.flow-circle svg{width:56px;height:56px;transition:transform .35s}
+.flow-step:hover .flow-circle{border-color:var(--teal);box-shadow:var(--teal-glow)}
+.flow-step:hover .flow-circle svg{transform:scale(1.1)}
+.flow-num-badge{position:absolute;top:-2px;right:-2px;width:22px;height:22px;background:var(--teal);border-radius:50%;color:var(--bg);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+.flow-sublabel{font-size:.68rem;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem}
+.flow-step h3{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.6rem}
+.flow-step p{color:var(--muted);font-size:.83rem;line-height:1.65}
+.flow-metric{font-size:.78rem;color:var(--teal);font-weight:600;margin-top:1rem;opacity:0;transform:translateY(8px);transition:all .35s}
+.flow-step:hover .flow-metric{opacity:1;transform:translateY(0)}
+
+/* IMPACT */
+.imp-band{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.imp-inner{max-width:1240px;margin:0 auto;padding:5.5rem 4rem}
+.imp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-top:3rem}
+.i-card{border-top:2px solid var(--teal);padding-top:1.5rem}
+.i-card.edu-ic{border-top-color:var(--edu)}
+.i-num{font-size:2.8rem;font-weight:900;color:#fff;line-height:1;text-shadow:0 0 30px rgba(0,200,200,.2)}
+.i-num.edu-n{text-shadow:0 0 30px rgba(123,95,255,.2)}
+.i-desc{color:var(--muted);font-size:.82rem;line-height:1.6;margin-top:.5rem}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2.5rem}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2rem;text-align:center;transition:border-color .25s,transform .25s}
+.t-card:hover{border-color:var(--teal);transform:translateY(-4px)}
+.t-av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#006688);color:var(--bg);font-size:1.1rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:var(--teal-glow)}
+.t-name{font-size:.9rem;font-weight:700;color:#fff}
+
+/* CONTACT */
+.cta-band{background:var(--bg);border-top:1px solid var(--border);padding:5.5rem 4rem}
+.cta-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.cta-left h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;color:#fff;line-height:1.25;margin-bottom:1rem}
+.cta-left p{color:var(--muted);font-size:.9rem;line-height:1.8;margin-bottom:2rem}
+.c-list{list-style:none}
+.c-list li{padding:.5rem 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:.86rem;display:flex;align-items:center;gap:.7rem}
+.c-list li span{color:var(--teal)}
+.form-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2.5rem;position:relative}
+.form-box::before,.form-box::after{content:'';position:absolute;width:18px;height:18px;border-color:var(--teal);border-style:solid}
+.form-box::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.form-box::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.form-box h3{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:1.5rem}
+.fg{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.9rem}
+.fg label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.fg input,.fg select,.fg textarea{padding:.68rem .9rem;border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:.87rem;outline:none;transition:border-color .2s;background:#070b12;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--teal)}
+.fg select option{background:#070b12}
+.fg textarea{min-height:85px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+footer{background:#04070e;border-top:1px solid var(--border);padding:1.8rem 4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.f-logo{font-size:1rem;font-weight:900;letter-spacing:.28em;color:#fff;display:flex;align-items:center;gap:.4rem}
+.f-dot{width:6px;height:6px;background:var(--teal);border-radius:50%}
+footer p{color:#3a5060;font-size:.75rem}
+
+.fade-in{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:960px){
+  #hero{grid-template-columns:1fr}.hero-visual{display:none}
+  .ov-inner{grid-template-columns:1fr}.dual-split{grid-template-columns:1fr}
+  .chal-grid,.cap-grid{grid-template-columns:repeat(2,1fr)}
+  .flow-wrap{grid-template-columns:1fr;gap:1rem}.flow-connector{display:none}
+  .imp-grid{grid-template-columns:repeat(2,1fr)}.cta-inner{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  nav{padding:0 1.5rem}.sec{padding:4rem 2rem}.cta-band{padding:4rem 2rem}
+}
+@media(max-width:560px){
+  .chal-grid,.cap-grid{grid-template-columns:1fr}.nav-links a{display:none}
+  .form-row{grid-template-columns:1fr}.ov-inner{padding:4rem 2rem}
+}
+</style>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><div class="logo-mark"><div class="logo-inner"></div></div>OBSIDIAN</div>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#challenges">Challenges</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#how">How It Works</a>
+    <a href="#impact">Impact</a>
+    <a href="#contact">Contact</a>
+    <button id="themeToggleBtn" class="theme-toggle" type="button" onclick="toggleThemeMode()">Light Mode</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-scanline"></div>
+  <div class="hero-text">
+    <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Open Innovation — Education & Industry</div>
+    <h1 class="hero-title">Bridging <span class="edu-em">Education</span><br>and <em>Industry</em><br>with AI Twins</h1>
+    <p class="hero-desc">A real-time AI Digital Twin platform for interactive simulation, experiential learning, and system monitoring — designed for both classrooms and factory floors.</p>
+    <div class="hero-dual">
+      <div class="dual-badge edu">🎓 Education-First</div>
+      <div class="dual-badge ind">🏭 Industry-Ready</div>
+    </div>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-p">Request a Demo</a>
+      <a href="#capabilities" class="btn-g">Explore Platform &rarr;</a>
+    </div>
+    <div class="hero-stats fade-in">
+      <div class="h-stat edu-stat"><div class="h-num">∞</div><div class="h-lbl">Parallel virtual lab sessions from one setup</div></div>
+      <div class="h-stat"><div class="h-num">~90%</div><div class="h-lbl">AI tracking accuracy via YOLOv8</div></div>
+      <div class="h-stat"><div class="h-num">&lt;80ms</div><div class="h-lbl">End-to-end synchronization latency</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <svg viewBox="0 0 580 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="ng" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b1"/><feGaussianBlur stdDeviation="7" result="b2"/><feMerge><feMergeNode in="b2" opacity=".4"/><feMergeNode in="b1" opacity=".6"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="sg" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b" opacity=".5"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Grid -->
+      <g stroke="#00c8c8" stroke-width="0.4" fill="none" opacity="0.12">
+        <line x1="290" y1="195" x2="0" y2="520"/><line x1="290" y1="195" x2="58" y2="520"/><line x1="290" y1="195" x2="116" y2="520"/><line x1="290" y1="195" x2="174" y2="520"/><line x1="290" y1="195" x2="232" y2="520"/><line x1="290" y1="195" x2="290" y2="520"/><line x1="290" y1="195" x2="348" y2="520"/><line x1="290" y1="195" x2="406" y2="520"/><line x1="290" y1="195" x2="464" y2="520"/><line x1="290" y1="195" x2="522" y2="520"/><line x1="290" y1="195" x2="580" y2="520"/>
+        <line x1="290" y1="195" x2="0" y2="0"/><line x1="290" y1="195" x2="116" y2="0"/><line x1="290" y1="195" x2="232" y2="0"/><line x1="290" y1="195" x2="290" y2="0"/><line x1="290" y1="195" x2="406" y2="0"/><line x1="290" y1="195" x2="580" y2="0"/>
+        <line x1="290" y1="195" x2="0" y2="130"/><line x1="290" y1="195" x2="0" y2="260"/><line x1="290" y1="195" x2="0" y2="390"/>
+        <line x1="290" y1="195" x2="580" y2="130"/><line x1="290" y1="195" x2="580" y2="260"/><line x1="290" y1="195" x2="580" y2="390"/>
+        <line x1="115" y1="100" x2="465" y2="100"/><line x1="165" y1="145" x2="415" y2="145"/><line x1="168" y1="248" x2="412" y2="248"/><line x1="125" y1="302" x2="455" y2="302"/><line x1="68" y1="368" x2="512" y2="368"/><line x1="20" y1="440" x2="560" y2="440"/>
+      </g>
+      <!-- Left robot arm -->
+      <g filter="url(#ng)" stroke="#00c8c8" stroke-width="1.5" fill="rgba(0,25,45,0.45)">
+        <rect x="4" y="455" width="155" height="58" opacity="0.82"/>
+        <polygon points="15,455 148,455 140,430 24,430" opacity="0.78"/>
+        <polygon points="28,430 136,430 128,408 36,408" opacity="0.72"/>
+        <line x1="55" y1="408" x2="55" y2="455" stroke-width="0.6" opacity="0.35"/><line x1="82" y1="408" x2="82" y2="455" stroke-width="0.6" opacity="0.35"/><line x1="109" y1="408" x2="109" y2="455" stroke-width="0.6" opacity="0.35"/>
+        <circle cx="80" cy="402" r="23" fill="none" opacity="0.9"/><circle cx="80" cy="402" r="14" fill="none" opacity="0.5"/><circle cx="80" cy="402" r="5" fill="#00c8c8" opacity="0.7"/>
+        <polygon points="62,397 98,397 140,225 104,225" opacity="0.88"/>
+        <line x1="70" y1="390" x2="111" y2="230" stroke-width="0.6" opacity="0.32"/><line x1="86" y1="393" x2="126" y2="232" stroke-width="0.6" opacity="0.32"/>
+        <circle cx="122" cy="224" r="20" fill="none" opacity="0.92"/><circle cx="122" cy="224" r="4.5" fill="#00c8c8" opacity="0.7"/>
+        <polygon points="104,220 140,220 188,86 152,86" opacity="0.88"/>
+        <line x1="112" y1="214" x2="159" y2="90" stroke-width="0.6" opacity="0.32"/>
+        <circle cx="170" cy="84" r="16" fill="none" opacity="0.92"/><circle cx="170" cy="84" r="3.5" fill="#00c8c8" opacity="0.7"/>
+        <rect x="148" y="64" width="48" height="22" opacity="0.9"/>
+        <polygon points="152,64 163,64 165,12 154,12" opacity="0.9"/><polygon points="177,64 188,64 190,12 179,12" opacity="0.9"/>
+        <rect x="152" y="7" width="13" height="7" opacity="0.85"/><rect x="177" y="7" width="13" height="7" opacity="0.85"/>
+      </g>
+      <!-- Right robot arm mirrored -->
+      <g filter="url(#ng)" stroke="#00c8c8" stroke-width="1.5" fill="rgba(0,25,45,0.45)" transform="translate(580,0) scale(-1,1)">
+        <rect x="4" y="455" width="155" height="58" opacity="0.82"/>
+        <polygon points="15,455 148,455 140,430 24,430" opacity="0.78"/>
+        <polygon points="28,430 136,430 128,408 36,408" opacity="0.72"/>
+        <circle cx="80" cy="402" r="23" fill="none" opacity="0.9"/><circle cx="80" cy="402" r="5" fill="#00c8c8" opacity="0.7"/>
+        <polygon points="62,397 98,397 140,225 104,225" opacity="0.88"/>
+        <circle cx="122" cy="224" r="20" fill="none" opacity="0.92"/><circle cx="122" cy="224" r="4.5" fill="#00c8c8" opacity="0.7"/>
+        <polygon points="104,220 140,220 188,86 152,86" opacity="0.88"/>
+        <circle cx="170" cy="84" r="16" fill="none" opacity="0.92"/><circle cx="170" cy="84" r="3.5" fill="#00c8c8" opacity="0.7"/>
+        <rect x="148" y="64" width="48" height="22" opacity="0.9"/>
+        <polygon points="152,64 163,64 165,12 154,12" opacity="0.9"/><polygon points="177,64 188,64 190,12 179,12" opacity="0.9"/>
+        <rect x="152" y="7" width="13" height="7" opacity="0.85"/><rect x="177" y="7" width="13" height="7" opacity="0.85"/>
+      </g>
+      <!-- Central mechanism -->
+      <g filter="url(#sg)" stroke="#00c8c8" fill="rgba(0,25,45,0.45)">
+        <polygon points="228,488 290,488 290,468 228,468" stroke-width="1.2" opacity="0.7"/>
+        <polygon points="290,488 352,488 352,468 290,468" stroke-width="1.2" opacity="0.7"/>
+        <circle cx="256" cy="464" r="13" fill="none" stroke-width="1.2" opacity="0.75"/><circle cx="324" cy="464" r="13" fill="none" stroke-width="1.2" opacity="0.75"/>
+        <polygon points="248,462 264,462 274,340 258,340" stroke-width="1.2" opacity="0.78"/><polygon points="316,462 332,462 322,340 306,340" stroke-width="1.2" opacity="0.78"/>
+        <circle cx="266" cy="336" r="11" fill="none" stroke-width="1.2" opacity="0.75"/><circle cx="314" cy="336" r="11" fill="none" stroke-width="1.2" opacity="0.75"/>
+        <polygon points="257,334 275,334 284,258 266,258" stroke-width="1.2" opacity="0.75"/><polygon points="305,334 323,334 314,258 296,258" stroke-width="1.2" opacity="0.75"/>
+        <circle cx="290" cy="232" r="50" fill="rgba(0,25,45,0.6)" stroke-width="2" opacity="0.92"/>
+        <circle cx="290" cy="232" r="36" fill="rgba(0,15,30,0.8)" stroke-width="1.5" opacity="0.88"/>
+        <circle cx="290" cy="232" r="20" fill="rgba(0,10,20,0.9)" stroke-width="2" opacity="0.95"/>
+        <circle cx="290" cy="232" r="6" fill="#00c8c8" stroke-width="0" opacity="0.8"/>
+        <line x1="290" y1="174" x2="290" y2="181" stroke-width="1.5" opacity="0.7"/><line x1="290" y1="283" x2="290" y2="290" stroke-width="1.5" opacity="0.7"/><line x1="232" y1="232" x2="239" y2="232" stroke-width="1.5" opacity="0.7"/><line x1="341" y1="232" x2="348" y2="232" stroke-width="1.5" opacity="0.7"/>
+      </g>
+      <!-- Data overlays -->
+      <g filter="url(#sg)" font-family="monospace" fill="none">
+        <rect x="8" y="20" width="120" height="58" stroke="#7b5fff" stroke-width="0.8" fill="rgba(15,5,40,0.7)" opacity="0.88" rx="1"/>
+        <line x1="8" y1="32" x2="128" y2="32" stroke="#7b5fff" stroke-width="0.5" opacity="0.5"/>
+        <text x="14" y="28" font-size="7" fill="#7b5fff" opacity="0.7">EDUCATION MODE</text>
+        <text x="14" y="46" font-size="9" fill="#b090ff">STUDENTS: 48</text>
+        <text x="14" y="58" font-size="9" fill="#b090ff">SESSIONS: 12</text>
+        <text x="14" y="70" font-size="9" fill="#00ff88">? ALL VIRTUAL</text>
+
+        <rect x="455" y="20" width="120" height="58" stroke="#00c8c8" stroke-width="0.8" fill="rgba(0,20,35,0.7)" opacity="0.88" rx="1"/>
+        <line x1="455" y1="32" x2="575" y2="32" stroke="#00c8c8" stroke-width="0.5" opacity="0.5"/>
+        <text x="461" y="28" font-size="7" fill="#00c8c8" opacity="0.7">INDUSTRY MODE</text>
+        <text x="461" y="46" font-size="9" fill="#00e8e8">ACC: 91.2%</text>
+        <text x="461" y="58" font-size="9" fill="#00e8e8">LAT: 64ms</text>
+        <text x="461" y="70" font-size="9" fill="#00e8e8">t: 3.1 Nm</text>
+
+        <rect x="8" y="465" width="118" height="40" stroke="#00c8c8" stroke-width="0.8" fill="rgba(0,20,35,0.7)" opacity="0.85" rx="1"/>
+        <text x="14" y="479" font-size="7" fill="#00c8c8" opacity="0.7">ACTUATOR STATUS</text>
+        <text x="14" y="494" font-size="9" fill="#00ff88">? ONLINE</text><text x="65" y="494" font-size="9" fill="#ffcc00">? SYNC</text>
+        <text x="254" y="215" font-size="8" fill="#00c8c8" opacity="0.6">VISION NODE</text>
+        <text x="266" y="258" font-size="9" fill="#00e8e8" opacity="0.8">YOLOv8</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="ticker-item">VIRTUAL LAB TWINS</span><span class="ticker-item">�</span><span class="ticker-item">EXPERIENTIAL LEARNING</span><span class="ticker-item">�</span><span class="ticker-item">WHAT-IF SCENARIOS</span><span class="ticker-item">�</span><span class="ticker-item">YOLOV8 VISION</span><span class="ticker-item">�</span><span class="ticker-item">PREDICTIVE MAINTENANCE</span><span class="ticker-item">�</span><span class="ticker-item">INDUSTRY 4.0</span><span class="ticker-item">�</span><span class="ticker-item">ANYTIME ANYWHERE LAB</span><span class="ticker-item">�</span><span class="ticker-item">BIDIRECTIONAL SYNC</span><span class="ticker-item">�</span>
+    <span class="ticker-item">VIRTUAL LAB TWINS</span><span class="ticker-item">�</span><span class="ticker-item">EXPERIENTIAL LEARNING</span><span class="ticker-item">�</span><span class="ticker-item">WHAT-IF SCENARIOS</span><span class="ticker-item">�</span><span class="ticker-item">YOLOV8 VISION</span><span class="ticker-item">�</span><span class="ticker-item">PREDICTIVE MAINTENANCE</span><span class="ticker-item">�</span><span class="ticker-item">INDUSTRY 4.0</span><span class="ticker-item">�</span><span class="ticker-item">ANYTIME ANYWHERE LAB</span><span class="ticker-item">�</span><span class="ticker-item">BIDIRECTIONAL SYNC</span><span class="ticker-item">�</span>
+  </div>
+</div>
+
+<!-- OVERVIEW / PROBLEM STATEMENT -->
+<div class="ov-wrap" id="problem">
+  <div class="ov-inner">
+    <div class="fade-in" style="position:relative">
+      <!-- HUD SVG -->
+      <svg viewBox="0 0 540 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:360px">
+        <defs>
+          <filter id="hg" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.5" result="b1"/><feGaussianBlur stdDeviation="8" result="b2"/><feMerge><feMergeNode in="b2" opacity=".3"/><feMergeNode in="b1" opacity=".5"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="pg" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b" opacity=".4"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <g filter="url(#hg)">
+          <ellipse cx="270" cy="315" rx="200" ry="46" fill="none" stroke="#00c8c8" stroke-width="3" opacity="0.9"/>
+          <ellipse cx="270" cy="315" rx="200" ry="46" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="12,4" opacity="0.3"/>
+          <text x="250" y="320" font-family="monospace" font-size="15" fill="#00e8e8" opacity="0.9" font-weight="700">INDUSTRY</text>
+          <ellipse cx="270" cy="230" rx="158" ry="36" fill="none" stroke="#7b5fff" stroke-width="2.5" opacity="0.85"/>
+          <ellipse cx="270" cy="230" rx="158" ry="36" fill="none" stroke="#b090ff" stroke-width="3" stroke-dasharray="10,5" opacity="0.25"/>
+          <text x="235" y="235" font-family="monospace" font-size="13" fill="#b090ff" opacity="0.9" font-weight="700">EDUCATION</text>
+          <ellipse cx="270" cy="160" rx="116" ry="26" fill="none" stroke="#00c8c8" stroke-width="2" opacity="0.65"/>
+          <text x="238" y="165" font-family="monospace" font-size="11" fill="#00e8e8" opacity="0.7" font-weight="700">UNIFIED AI TWIN</text>
+        </g>
+        <g stroke="#7b5fff" stroke-width="0.8" fill="none" opacity="0.4">
+          <line x1="112" y1="230" x2="154" y2="160"/><line x1="428" y1="230" x2="386" y2="160"/>
+        </g>
+        <g stroke="#00c8c8" stroke-width="0.8" fill="none" opacity="0.35">
+          <line x1="70" y1="315" x2="112" y2="230"/><line x1="470" y1="315" x2="428" y2="230"/>
+        </g>
+        <!-- Panels -->
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="4" y="18" width="120" height="68" fill="rgba(15,5,40,.85)" stroke="#7b5fff" stroke-width="0.8" rx="1"/>
+          <line x1="4" y1="30" x2="124" y2="30" stroke="#7b5fff" stroke-width="0.5" opacity="0.5"/>
+          <text x="10" y="27" font-family="monospace" font-size="7" fill="#7b5fff" opacity="0.7">STUDENTS ONLINE</text>
+          <text x="10" y="48" font-family="monospace" font-size="16" fill="#b090ff" font-weight="700">48</text>
+          <text x="10" y="62" font-family="monospace" font-size="8" fill="#7b5fff" opacity="0.7">Virtual sessions</text>
+          <text x="10" y="76" font-family="monospace" font-size="8" fill="#00ff88">→ 1 physical unit</text>
+        </g>
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="4" y="118" width="120" height="68" fill="rgba(15,5,40,.85)" stroke="#7b5fff" stroke-width="0.8" rx="1"/>
+          <line x1="4" y1="130" x2="124" y2="130" stroke="#7b5fff" stroke-width="0.5" opacity="0.5"/>
+          <text x="10" y="127" font-family="monospace" font-size="7" fill="#7b5fff" opacity="0.7">WHAT-IF SCENARIOS</text>
+          <rect x="10" y="140" width="12" height="38" fill="#7b5fff" opacity="0.25"/><rect x="28" y="148" width="12" height="30" fill="#7b5fff" opacity="0.4"/><rect x="46" y="136" width="12" height="42" fill="#7b5fff" opacity="0.3"/><rect x="64" y="144" width="12" height="34" fill="#7b5fff" opacity="0.5"/><rect x="82" y="150" width="12" height="28" fill="#7b5fff" opacity="0.38"/>
+          <text x="10" y="184" font-family="monospace" font-size="8" fill="#b090ff" opacity="0.8">SAFE SIMULATION</text>
+        </g>
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="4" y="218" width="120" height="68" fill="rgba(0,18,30,.85)" stroke="#00c8c8" stroke-width="0.8" rx="1"/>
+          <text x="10" y="235" font-family="monospace" font-size="7" fill="#00c8c8" opacity="0.7">LAB ACCESS</text>
+          <circle cx="36" cy="260" r="20" fill="none" stroke="#1a3050" stroke-width="5"/>
+          <circle cx="36" cy="260" r="20" fill="none" stroke="#7b5fff" stroke-width="5" stroke-dasharray="100 26" stroke-dashoffset="25" opacity="0.9"/>
+          <text x="28" y="264" font-family="monospace" font-size="9" fill="#b090ff">24/7</text>
+          <text x="68" y="256" font-family="monospace" font-size="8" fill="#00c8c8" opacity="0.7">Anytime</text>
+          <text x="68" y="268" font-family="monospace" font-size="8" fill="#00c8c8" opacity="0.7">Anywhere</text>
+        </g>
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="416" y="18" width="120" height="68" fill="rgba(0,18,30,.85)" stroke="#00c8c8" stroke-width="0.8" rx="1"/>
+          <line x1="416" y1="30" x2="536" y2="30" stroke="#00c8c8" stroke-width="0.5" opacity="0.5"/>
+          <text x="422" y="27" font-family="monospace" font-size="7" fill="#00c8c8" opacity="0.7">INDUSTRY TELEMETRY</text>
+          <polyline points="422,68 434,60 448,64 460,50 472,58 484,44 496,54 508,42 520,50 532,38" fill="none" stroke="#00e8e8" stroke-width="1.2" opacity="0.8"/>
+          <text x="422" y="79" font-family="monospace" font-size="8" fill="#00ff88">69ms ✓ LIVE</text>
+        </g>
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="416" y="118" width="120" height="68" fill="rgba(0,18,30,.85)" stroke="#00c8c8" stroke-width="0.8" rx="1"/>
+          <text x="422" y="135" font-family="monospace" font-size="7" fill="#00c8c8" opacity="0.7">PREDICTIVE ANALYSIS</text>
+          <text x="422" y="156" font-family="monospace" font-size="10" fill="#00ff88">NOMINAL</text>
+          <text x="422" y="170" font-family="monospace" font-size="8" fill="#00e8e8" opacity="0.7">NEXT MAINT: +14d</text>
+          <text x="422" y="182" font-family="monospace" font-size="8" fill="#ffcc00" opacity="0.7">⚠️ 1 ALERT</text>
+        </g>
+        <g filter="url(#pg)" opacity="0.88">
+          <rect x="416" y="218" width="120" height="68" fill="rgba(0,18,30,.85)" stroke="#00c8c8" stroke-width="0.8" rx="1"/>
+          <text x="422" y="235" font-family="monospace" font-size="7" fill="#00c8c8" opacity="0.7">SYNC STATUS</text>
+          <text x="422" y="254" font-family="monospace" font-size="9" fill="#00ff88">CONNECTED</text>
+          <text x="422" y="267" font-family="monospace" font-size="8" fill="#00e8e8" opacity="0.7">BLENDER ↔ MQTT</text>
+          <text x="422" y="280" font-family="monospace" font-size="8" fill="#00e8e8" opacity="0.7">NODES: 1 ACTIVE</text>
+        </g>
+        <g stroke="#00c8c8" stroke-width="0.7" fill="none" opacity="0.4">
+          <line x1="124" y1="52" x2="150" y2="162"/><circle cx="150" cy="162" r="3" fill="#00c8c8" opacity="0.7"/>
+          <line x1="124" y1="152" x2="118" y2="228"/><circle cx="118" cy="228" r="3" fill="#7b5fff" opacity="0.7"/>
+          <line x1="124" y1="252" x2="76" y2="310"/><circle cx="76" cy="310" r="3" fill="#00c8c8" opacity="0.7"/>
+          <line x1="416" y1="52" x2="390" y2="162"/><circle cx="390" cy="162" r="3" fill="#00c8c8" opacity="0.7"/>
+          <line x1="416" y1="152" x2="422" y2="228"/><circle cx="422" cy="228" r="3" fill="#7b5fff" opacity="0.7"/>
+          <line x1="416" y1="252" x2="464" y2="310"/><circle cx="464" cy="310" r="3" fill="#00c8c8" opacity="0.7"/>
+        </g>
+        <g stroke="#00c8c8" stroke-width="1.2" fill="none" opacity="0.5">
+          <path d="M0,0 L0,12 M0,0 L12,0"/><path d="M540,0 L540,12 M540,0 L528,0"/>
+          <path d="M0,380 L0,368 M0,380 L12,380"/><path d="M540,380 L540,368 M540,380 L528,380"/>
+        </g>
+      </svg>
+    </div>
+    <div class="ov-text fade-in">
+      <div class="ov-label">The Problem</div>
+      <h2 class="ov-title">A gap between theory,<br>simulation & reality</h2>
+      <p>Modern engineering education and industrial systems share a critical limitation: <strong style="color:#fff">insufficient real-time access to physical systems</strong> for safe experimentation, continuous learning, and scenario evaluation.</p>
+      <p>Students face restricted lab access, limited hardware, and risk of damage — leading to theoretical knowledge without hands-on depth. Industries face downtime risks and high costs of physical experimentation.</p>
+      <p>Both learners and professionals lack a <strong style="color:var(--teal)">safe, scalable environment</strong> to experiment, analyze, and make informed decisions in real time.</p>
+      <div class="ov-pills">
+        <span class="pill edu">Virtual Labs</span><span class="pill edu">What-If Scenarios</span><span class="pill teal">Predictive Analysis</span><span class="pill teal">Real-Time Monitoring</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHALLENGES -->
+<div id="challenges">
+<div class="sec">
+  <div class="fade-in">
+    <div class="sec-label">Industry Challenges</div>
+    <h2 class="sec-title">Where both sectors struggle</h2>
+    <p class="sec-sub">From lecture halls to factory floors — the inability to safely experiment, observe, and iterate in real time holds back both learners and professionals.</p>
+  </div>
+
+  <div class="chal-grid fade-in" id="edu-chal-grid">
+    <div class="chal-card edu-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#080510"/>
+          <rect x="70" y="30" width="160" height="90" rx="3" fill="#0d0820" stroke="#7b5fff" stroke-width="1.2" opacity=".7"/>
+          <rect x="80" y="40" width="60" height="40" rx="2" fill="#100c28" stroke="#7b5fff" stroke-width="1" opacity=".5"/>
+          <rect x="152" y="40" width="70" height="40" rx="2" fill="#100c28" stroke="#7b5fff" stroke-width="1" opacity=".5"/>
+          <line x1="80" y1="90" x2="230" y2="90" stroke="#7b5fff" stroke-width=".5" opacity=".3"/>
+          <circle cx="20" cy="75" r="14" fill="none" stroke="#ff4455" stroke-width="1.5" opacity=".7"/>
+          <line x1="10" y1="65" x2="30" y2="85" stroke="#ff4455" stroke-width="2" opacity=".7"/>
+          <text x="80" y="108" font-family="monospace" font-size="7" fill="#7b5fff" opacity=".6">LAB CAPACITY: 8 STUDENTS</text>
+          <text x="80" y="118" font-family="monospace" font-size="7" fill="#ff4455" opacity=".7">WAITLIST: 40 STUDENTS</text>
+          <text x="20" y="132" font-family="monospace" font-size="7" fill="#ff8800" opacity=".7">? RESTRICTED</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num edu-num">EDU � 01</div><h3>Restricted Lab Access</h3><p>Limited physical setups mean most students wait � theoretical learning without hands-on time.</p></div>
+    </div>
+    <div class="chal-card edu-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#080510"/>
+          <rect x="100" y="50" width="100" height="70" rx="3" fill="#100c28" stroke="#7b5fff" stroke-width="1.2" opacity=".6"/>
+          <text x="120" y="82" font-family="monospace" font-size="10" fill="#7b5fff" opacity=".5">FRAGILE</text>
+          <text x="115" y="97" font-family="monospace" font-size="10" fill="#7b5fff" opacity=".5">HARDWARE</text>
+          <path d="M145 50 L155 20 L165 50" fill="none" stroke="#ff4455" stroke-width="2" opacity=".7"/>
+          <circle cx="155" cy="18" r="4" fill="#ff4455" opacity=".8"/>
+          <path d="M120 50 L135 50 L135 30" fill="none" stroke="#ffcc00" stroke-width="1.5" opacity=".6" stroke-dasharray="3,2"/>
+          <path d="M180 50 L165 50 L165 28" fill="none" stroke="#ffcc00" stroke-width="1.5" opacity=".6" stroke-dasharray="3,2"/>
+          <text x="30" y="100" font-family="monospace" font-size="8" fill="#ff4455" opacity=".7">DAMAGE RISK</text>
+          <text x="210" y="100" font-family="monospace" font-size="8" fill="#ffcc00" opacity=".7">HIGH COST</text>
+          <text x="90" y="140" font-family="monospace" font-size="7" fill="#7b5fff" opacity=".5">ZERO MARGIN FOR ERROR</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num edu-num">EDU � 02</div><h3>Risk of Hardware Damage</h3><p>Expensive equipment limits free experimentation � students learn cautiously instead of deeply.</p></div>
+    </div>
+    <div class="chal-card edu-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#080510"/>
+          <rect x="40" y="40" width="100" height="70" rx="3" fill="#100c28" stroke="#7b5fff" stroke-width="1.2" opacity=".6"/>
+          <text x="60" y="72" font-family="monospace" font-size="8" fill="#7b5fff" opacity=".5">THEORY</text>
+          <text x="58" y="86" font-family="monospace" font-size="8" fill="#7b5fff" opacity=".5">ONLY</text>
+          <line x1="140" y1="75" x2="165" y2="75" stroke="#ff4455" stroke-width="2" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="162" y1="69" x2="175" y2="75" stroke="#ff4455" stroke-width="2" opacity=".6"/>
+          <line x1="162" y1="81" x2="175" y2="75" stroke="#ff4455" stroke-width="2" opacity=".6"/>
+          <rect x="175" y="40" width="85" height="70" rx="3" fill="#0a1520" stroke="#1e2d48" stroke-width="1" opacity=".4" stroke-dasharray="4,3"/>
+          <text x="192" y="72" font-family="monospace" font-size="8" fill="#1e2d48">PRACTICE</text>
+          <text x="198" y="86" font-family="monospace" font-size="7" fill="#1e2d48">MISSING</text>
+          <text x="65" y="130" font-family="monospace" font-size="7" fill="#7b5fff" opacity=".5">NO WHAT-IF SCENARIOS</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num edu-num">EDU � 03</div><h3>No What-If Experimentation</h3><p>Students cannot safely run scenario simulations � conceptual understanding remains surface-level.</p></div>
+    </div>
+  </div>
+
+  <!-- Industry challenges -->
+  <div class="chal-grid fade-in" id="ind-chal-grid">
+    <div class="chal-card ind-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#060e10"/>
+          <rect x="20" y="20" width="85" height="55" rx="2" fill="#0a1525" stroke="#00c8c8" stroke-width="1" opacity=".6"/>
+          <polyline points="28,65 38,52 50,58 62,44 75,50 88,38 100,42" fill="none" stroke="#00c8c8" stroke-width="1.5" opacity=".8"/>
+          <circle cx="62" cy="44" r="3" fill="#00c8c8" opacity=".9"/>
+          <rect x="120" y="20" width="85" height="55" rx="2" fill="#0a1525" stroke="#1e2d48" stroke-width="1" opacity=".4"/>
+          <polyline points="128,60 140,55 152,58 165,52 178,55 190,48 205,50" fill="none" stroke="#1e2d48" stroke-width="1" opacity=".4"/>
+          <rect x="20" y="90" width="85" height="45" rx="2" fill="#0a1525" stroke="#1e2d48" stroke-width="1" opacity=".4"/>
+          <text x="35" y="115" font-family="monospace" font-size="8" fill="#6a82a0" opacity=".5">MANUAL CHECK</text>
+          <text x="120" y="107" font-family="monospace" font-size="7" fill="#ff8800" opacity=".7">? MANUAL OVERSIGHT</text>
+          <text x="120" y="119" font-family="monospace" font-size="7" fill="#6a82a0" opacity=".5">NO AUTO DETECTION</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num ind-num">IND � 01</div><h3>Manual Monitoring at Scale</h3><p>Human oversight introduces delays and errors across multi-machine industrial operations.</p></div>
+    </div>
+    <div class="chal-card ind-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#0f0808"/>
+          <circle cx="150" cy="72" r="42" fill="none" stroke="#ff4455" stroke-width="1.5" opacity=".5"/>
+          <circle cx="150" cy="72" r="30" fill="#0f0808" stroke="#ff4455" stroke-width="1" opacity=".4"/>
+          <line x1="150" y1="72" x2="150" y2="48" stroke="#ff4455" stroke-width="2" stroke-linecap="round"/>
+          <line x1="150" y1="72" x2="168" y2="64" stroke="#ff4455" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="150" cy="72" r="4" fill="#ff4455"/>
+          <rect x="55" y="24" width="8" height="12" rx="1" fill="none" stroke="#ff4455" stroke-width="1" opacity=".4"/>
+          <rect x="237" y="24" width="8" height="12" rx="1" fill="none" stroke="#ff4455" stroke-width="1" opacity=".4"/>
+          <path d="M60 135 L75 112 L90 135 Z" fill="none" stroke="#ffcc00" stroke-width="1.5" opacity=".8"/>
+          <line x1="75" y1="118" x2="75" y2="127" stroke="#ffcc00" stroke-width="1.5"/>
+          <circle cx="75" cy="131" r="1.5" fill="#ffcc00"/>
+          <text x="98" y="128" font-family="monospace" font-size="8" fill="#ff4455" opacity=".8">MACHINE OFFLINE</text>
+          <text x="98" y="140" font-family="monospace" font-size="7" fill="#ff8800" opacity=".7">NO PREDICTION</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num ind-num">IND � 02</div><h3>Unplanned Downtime</h3><p>Without predictive analytics, machinery failures are purely reactive and extremely costly.</p></div>
+    </div>
+    <div class="chal-card ind-chal">
+      <div class="chal-img">
+        <svg viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150" fill="#060e06"/>
+          <line x1="30" y1="125" x2="270" y2="125" stroke="#1e2d48" stroke-width="1"/>
+          <rect x="50" y="92" width="38" height="33" rx="1" fill="rgba(0,200,200,.15)" stroke="#00c8c8" stroke-width="1.2"/>
+          <rect x="106" y="72" width="38" height="53" rx="1" fill="rgba(255,136,0,.12)" stroke="#ff8800" stroke-width="1.4"/>
+          <rect x="162" y="42" width="38" height="83" rx="1" fill="rgba(255,68,85,.12)" stroke="#ff4455" stroke-width="1.8"/>
+          <text x="47" y="88" font-family="monospace" font-size="7" fill="#00c8c8">$100</text>
+          <text x="100" y="68" font-family="monospace" font-size="7" fill="#ff8800">$2K</text>
+          <text x="158" y="38" font-family="monospace" font-size="7" fill="#ff4455">$10K+</text>
+          <text x="45" y="140" font-family="monospace" font-size="6" fill="#00c8c8">OBSIDIAN</text>
+          <text x="100" y="140" font-family="monospace" font-size="6" fill="#ff8800">MID-TIER</text>
+          <text x="155" y="140" font-family="monospace" font-size="6" fill="#ff4455">ENTERPRISE</text>
+          <line x1="30" y1="92" x2="270" y2="92" stroke="#ffcc00" stroke-width="0.8" stroke-dasharray="4,3" opacity=".5"/>
+          <text x="36" y="88" font-family="monospace" font-size="6" fill="#ffcc00" opacity=".7">SME LIMIT</text>
+        </svg>
+      </div>
+      <div class="chal-body"><div class="chal-num ind-num">IND � 03</div><h3>Prohibitive Cost Barriers</h3><p>Enterprise-grade systems cost $10,000+ � completely unreachable for SMEs and startups.</p></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CAPABILITIES � 3 SECTIONS -->
+<div id="capabilities" style="background:var(--surface)">
+<div class="sec">
+  <div class="fade-in">
+    <div class="sec-label">Key Capabilities</div>
+    <h2 class="sec-title">What Obsidian delivers</h2>
+    <p class="sec-sub">Three distinct capability layers � purpose-built for education, ready for industry, and an expanding roadmap of what's next.</p>
+  </div>
+
+  <div class="sector-container">
+    <div class="sector-block edu-sector" onclick="openEducationSectorPage()"><span>Education Sector</span><span class="sector-click-hint">Click here</span></div>
+    <div class="sector-block ind-sector" onclick="openIndustryFrontend()"><span>Industry Sector</span><span class="sector-click-hint">Click here</span></div>
+    <div class="sector-block coming-soon-sector"><span>Coming Soon</span></div>
+  </div>
+
+  <!-- EDUCATION capabilities -->
+  <div class="cap-grid fade-in" id="edu-grid" style="display:none"></div>
+
+  <!-- INDUSTRY capabilities -->
+  <div class="cap-grid fade-in" id="ind-grid" style="display:none"></div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<div id="how">
+<div class="sec">
+  <div class="fade-in">
+    <div class="sec-label">Implementation</div>
+    <h2 class="sec-title">How it works</h2>
+    <p class="sec-sub">Three interconnected layers forming a closed-loop system � from physical edge hardware through AI perception to the unified digital twin interface. Hover each to explore.</p>
+  </div>
+  <div class="flow-wrap fade-in">
+    <div class="flow-connector"></div>
+    <div class="flow-step">
+      <div class="flow-circle"><div class="flow-num-badge">1</div>
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="16" width="32" height="26" rx="2" stroke="#00c8c8" stroke-width="1.5" opacity=".85"/>
+          <rect x="18" y="21" width="8" height="8" rx="1" stroke="#00c8c8" stroke-width="1" opacity=".6"/>
+          <rect x="30" y="21" width="8" height="8" rx="1" stroke="#00c8c8" stroke-width="1" opacity=".6"/>
+          <line x1="12" y1="31" x2="44" y2="31" stroke="#00c8c8" stroke-width=".5" opacity=".3"/>
+          <line x1="16" y1="42" x2="16" y2="48" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="21" y1="42" x2="21" y2="48" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="26" y1="42" x2="26" y2="48" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="31" y1="42" x2="31" y2="48" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="36" y1="42" x2="36" y2="48" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <path d="M22 10 Q28 6 34 10" fill="none" stroke="#00c8c8" stroke-width="1.2" opacity=".5"/>
+          <circle cx="28" cy="14" r="2" fill="#00c8c8" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="flow-sublabel">Physical Edge & Actuation</div>
+      <h3>Edge Devices Capture & Act</h3>
+      <p>stream live visual data, real-time actuation from synchronized virtual commands and telemetry.</p>
+      <div class="flow-metric">? Continuous telemetry extraction</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle"><div class="flow-num-badge">2</div>
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="28" cy="28" r="16" stroke="#00c8c8" stroke-width="1.5" opacity=".85"/>
+          <circle cx="28" cy="28" r="8" stroke="#00c8c8" stroke-width="1" opacity=".5"/>
+          <line x1="12" y1="28" x2="20" y2="28" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="36" y1="28" x2="44" y2="28" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="28" y1="12" x2="28" y2="20" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <line x1="28" y1="36" x2="28" y2="44" stroke="#00c8c8" stroke-width="1.2" opacity=".7"/>
+          <rect x="7" y="7" width="14" height="12" rx="1" stroke="#00e8e8" stroke-width="1" stroke-dasharray="2,2" opacity=".7"/>
+          <circle cx="28" cy="28" r="3" fill="#00c8c8" opacity=".85"/>
+        </svg>
+      </div>
+      <div class="flow-sublabel">AI Perception & Tracking</div>
+      <h3>YOLOv8 Analyzes in Real Time</h3>
+      <p>Markerless spatial computing computes joint angles and pose estimation autonomously � enabling both student observation and industrial monitoring.</p>
+      <div class="flow-metric">? ~90% tracking accuracy</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-circle"><div class="flow-num-badge">3</div>
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="12" width="40" height="30" rx="2" stroke="#00c8c8" stroke-width="1.5" opacity=".85"/>
+          <line x1="8" y1="20" x2="48" y2="20" stroke="#00c8c8" stroke-width=".8" opacity=".5"/>
+          <polyline points="13,36 19,30 25,32 31,26 37,28 43,22" fill="none" stroke="#00c8c8" stroke-width="1.2" opacity=".8"/>
+          <circle cx="31" cy="26" r="2" fill="#00c8c8" opacity=".8"/>
+          <rect x="14" y="14" width="12" height="4" rx="1" fill="#00c8c8" opacity=".2"/>
+          <rect x="30" y="14" width="12" height="4" rx="1" fill="#7b5fff" opacity=".2"/>
+          <circle cx="14" cy="43" r="2" fill="#00c8c8" opacity=".7"/>
+          <circle cx="22" cy="43" r="2" fill="#7b5fff" opacity=".7"/>
+          <circle cx="30" cy="43" r="2" fill="#00ff88" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="flow-sublabel">Digital Twin Interface</div>
+      <h3>Virtual &amp; Physical Unified</h3>
+      <p>Real-time pipelines unify physical and virtual state. Students and operators share the same 3D interface � one for learning, one for decision-making.</p>
+      <div class="flow-metric">? &lt;80ms end-to-end latency</div>
+    </div>
+  </div>
+
+  <!-- Dual sector impact of the system -->
+  <div class="dual-split fade-in" style="margin-top:3.5rem">
+    <div class="sector-card edu-card">
+      <div class="sector-head">
+        <div class="sector-icon edu-icon">🎓</div>
+        <div><h3>In Education</h3><span class="edu-tag">Student-Focused</span></div>
+      </div>
+      <ul class="sector-list edu-list">
+        <li>Interact with virtual lab twins instead of fragile hardware</li>
+        <li>One physical setup supports large-scale parallel simulations</li>
+        <li>Anytime, anywhere experimentation without lab access constraints</li>
+        <li>Run what-if scenarios to deeply understand system behavior</li>
+        <li>Reduce hardware damage while improving conceptual understanding</li>
+      </ul>
+    </div>
+    <div class="sector-card ind-card">
+      <div class="sector-head">
+        <div class="sector-icon ind-icon">🏭</div>
+        <div><h3>In Industry</h3><span class="ind-tag">Operations-Focused</span></div>
+      </div>
+      <ul class="sector-list">
+        <li>Real-time monitoring of system behavior and performance</li>
+        <li>Simulate operational scenarios before and during execution</li>
+        <li>Predictive analysis using historical and live system telemetry</li>
+        <li>Evaluate failure cases, edge conditions, and optimization strategies</li>
+        <li>Safe experimentation on live systems for informed decision-making</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- IMPACT -->
+<div class="imp-band" id="impact">
+<div class="imp-inner">
+  <div class="fade-in">
+    <div class="sec-label">Impact & Metrics</div>
+    <h2 class="sec-title">Bridging theory, simulation<br>and real-world operations</h2>
+    <p class="sec-sub">Unified impact across both sectors � shifting learners and operators from passive observation to active experimentation and data-driven decision-making.</p>
+  </div>
+  <div class="imp-grid fade-in">
+    <div class="i-card edu-ic"><div class="i-num edu-n" style="font-size:2.2rem">Unlimited</div><div class="i-desc">Concurrent virtual student sessions from a single physical hardware setup</div></div>
+    <div class="i-card edu-ic"><div class="i-num edu-n">24/7</div><div class="i-desc">Lab availability � students experiment anytime without physical access constraints</div></div>
+    <div class="i-card"><div class="i-num">~90%</div><div class="i-desc">YOLOv8 tracking accuracy for kinematic pose estimation on real industrial hardware</div></div>
+    <div class="i-card"><div class="i-num">100x</div><div class="i-desc">Cost reduction � replacing $10,000+ sensor arrays with a sub-$100 edge-native architecture</div></div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TEAM -->
+<div id="team"><div class="sec">
+  <div class="fade-in">
+    <div class="sec-label">The Team</div>
+    <h2 class="sec-title">Built at Cambridge Institute<br>of Technology, North Campus</h2>
+  </div>
+  <div class="team-grid fade-in">
+    <div class="t-card"><div class="t-av">SL</div><div class="t-name">Samuel Lazar</div></div>
+    <div class="t-card"><div class="t-av">ML</div><div class="t-name">Monish L</div></div>
+    <div class="t-card"><div class="t-av">PC</div><div class="t-name">Preran C V N</div></div>
+    <div class="t-card"><div class="t-av">GY</div><div class="t-name">G Yashaswini</div></div>
+  </div>
+</div></div>
+
+<!-- CONTACT -->
+<div class="cta-band" id="contact">
+  <div class="cta-inner">
+    <div class="cta-left fade-in">
+      <h2>Ready to transform<br>how you learn or operate?</h2>
+      <p>Obsidian is open for collaboration — whether you're an educational institution seeking a virtual lab platform, an SME looking to deploy, or a researcher interested in open innovation.</p>
+      <ul class="c-list">
+        <li><span>✉️</span>samuel272lazar@gmail.com</li>
+        <li><span>🏛️</span>Cambridge Institute of Technology, North Campus</li>
+        <li><span>🎓</span>Education-First · Industry-Ready · Open Innovation</li>
+      </ul>
+    </div>
+    <div class="form-box fade-in">
+      <h3>Request a Demo</h3>
+      <div class="form-row">
+        <div class="fg"><label>First Name</label><input type="text" placeholder="John"></div>
+        <div class="fg"><label>Last Name</label><input type="text" placeholder="Doe"></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" placeholder="john@institution.com"></div>
+      <div class="fg"><label>Institution / Organization</label><input type="text" placeholder="University or company name"></div>
+      <div class="fg"><label>I am interested in</label><select><option>Educational Virtual Labs</option><option>Industry Deployment</option><option>Research Collaboration</option><option>Open Source Contribution</option><option>Investor / Partnership</option></select></div>
+      <div class="fg"><label>Message</label><textarea placeholder="Tell us about your use case..."></textarea></div>
+      <button class="btn-p" style="width:100%;padding:1rem" onclick="submitForm(this)">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo"><div class="f-dot"></div>OBSIDIAN</div>
+  <p>� 2026 Obsidian Digital Twin � Cambridge Institute of Technology � samuel272lazar@gmail.com</p>
+</footer>
+
+<script>
+const THEME_STORAGE_KEY='obsidian-theme';
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.07});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+function submitForm(btn){btn.textContent='Submitting...';btn.disabled=true;setTimeout(()=>{btn.textContent='✓ Request Received — We\'ll be in touch';btn.style.background='#007755'},1400)}
+function toggleSection(section){const eduGrid=document.getElementById('edu-grid');const indGrid=document.getElementById('ind-grid');if(section==='edu'){const visible=eduGrid.style.display==='grid';eduGrid.style.display=visible?'none':'grid';if(!visible)indGrid.style.display='none'}else if(section==='ind'){const visible=indGrid.style.display==='grid';indGrid.style.display=visible?'none':'grid';if(!visible)eduGrid.style.display='none'}}
+function openIndustryFrontend(){window.top.location.href='/dashboard'}
+function openEducationSectorPage(){window.top.location.href='/OBS_ROBOTICS_LAB.html'}
+function updateThemeToggleLabel(){const btn=document.getElementById('themeToggleBtn');if(btn){btn.textContent=document.body.getAttribute('data-theme')==='light'?'Dark Mode':'Light Mode'}}
+function toggleThemeMode(){const nextTheme=document.body.getAttribute('data-theme')==='light'?'dark':'light';document.body.setAttribute('data-theme',nextTheme);localStorage.setItem(THEME_STORAGE_KEY,nextTheme);updateThemeToggleLabel()}
+const initialTheme=localStorage.getItem(THEME_STORAGE_KEY)||'dark';
+document.body.setAttribute('data-theme',initialTheme);
+updateThemeToggleLabel();
+</script>
+</body>
+</html>

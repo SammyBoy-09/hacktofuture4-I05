@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obsidian - Education Sector</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06090f;--surface:#0b1120;--card:#0f1829;--card2:#131f35;
+  --border:#1e2d48;--text:#d0dcee;--muted:#6a82a0;
+  --teal:#00c8c8;--teal2:#00e8e8;--teal3:rgba(0,200,200,.12);
+  --edu:#7b5fff;--edu-dim:rgba(123,95,255,.12);
+  --teal-glow:0 0 20px rgba(0,200,200,.3),0 0 40px rgba(0,200,200,.12);
+  --nav-bg:rgba(6,9,15,.9)
+}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(circle at 12% 10%, rgba(123,95,255,.12) 0%, transparent 36%),
+    radial-gradient(circle at 86% 20%, rgba(0,200,200,.10) 0%, transparent 38%),
+    radial-gradient(circle at 78% 88%, rgba(0,200,200,.07) 0%, transparent 24%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  overflow-x:hidden
+}
+
+body[data-theme='light']{
+  --bg:#eef4fb;--surface:#ffffff;--card:#f8fbff;--card2:#edf3fb;
+  --border:#cbd8e8;--text:#12263f;--muted:#55708e;
+  --teal:#008f9a;--teal2:#00aebb;--teal3:rgba(0,143,154,.12);
+  --edu:#6a4ce7;--edu-dim:rgba(106,76,231,.12);
+  --teal-glow:0 0 20px rgba(0,143,154,.2),0 0 40px rgba(0,143,154,.08);
+  --nav-bg:rgba(255,255,255,.92)
+}
+
+.top-actions{
+  position:fixed;
+  top:14px;
+  right:16px;
+  z-index:1000;
+  display:flex;
+  flex-direction:column;
+  gap:.6rem
+}
+.theme-toggle,
+.back-btn{
+  padding:.48rem 1rem;
+  border-radius:20px;
+  border:1px solid var(--border);
+  color:var(--text);
+  background:var(--card);
+  cursor:pointer;
+  font-size:.76rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  text-decoration:none;
+  text-align:center;
+  transition:all .2s
+}
+.theme-toggle:hover,
+.back-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+.main-wrap{
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:7rem 1.5rem 2rem
+}
+
+.sector-container{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.sector-block{
+  width:220px;
+  height:220px;
+  border-radius:8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  font-size:1.2rem;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  transition:all .3s;
+  padding:2.9rem 1rem 1rem;
+  line-height:1.2;
+  position:relative
+}
+.sector-block.edu-sector{background:linear-gradient(135deg,rgba(123,95,255,.2),rgba(123,95,255,.1));border:2px solid var(--edu);color:var(--edu)}
+.sector-block.coming-soon-sector{background:linear-gradient(135deg,rgba(255,160,48,.12),rgba(255,160,48,.06));border:2px solid rgba(255,160,48,.5);color:#ffa030;justify-content:center;padding:1rem;cursor:default}
+.sector-block:hover{transform:scale(1.05);box-shadow:var(--teal-glow)}
+.sector-block.coming-soon-sector:hover{transform:none;box-shadow:none}
+.sector-click-hint{position:absolute;left:50%;bottom:3.6rem;transform:translateX(-50%);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.38;color:currentColor;white-space:nowrap}
+.sector-block:hover .sector-click-hint{text-decoration:underline;text-underline-offset:3px}
+
+@media(max-width:640px){
+  .sector-block{width:190px;height:190px;font-size:1.05rem}
+}
+</style>
+</head>
+<body>
+  <div class="top-actions">
+    <button id="themeToggleBtn" class="theme-toggle" type="button" onclick="toggleThemeMode()">Light Mode</button>
+    <a class="back-btn" href="javascript:void(0)" onclick="window.top.location.href='/'">Back to Dashboard</a>
+  </div>
+
+  <main class="main-wrap">
+    <div class="sector-container">
+      <div class="sector-block edu-sector" onclick="openRoboticsLab()">
+        <span>Robotics Lab</span>
+        <span class="sector-click-hint">Click here</span>
+      </div>
+      <div class="sector-block coming-soon-sector">
+        <span>Coming Soon</span>
+      </div>
+    </div>
+  </main>
+
+<script>
+const THEME_STORAGE_KEY='obsidian-theme';
+function updateThemeToggleLabel(){const btn=document.getElementById('themeToggleBtn');if(btn){btn.textContent=document.body.getAttribute('data-theme')==='light'?'Dark Mode':'Light Mode'}}
+function toggleThemeMode(){const nextTheme=document.body.getAttribute('data-theme')==='light'?'dark':'light';document.body.setAttribute('data-theme',nextTheme);localStorage.setItem(THEME_STORAGE_KEY,nextTheme);updateThemeToggleLabel()}
+const initialTheme=localStorage.getItem(THEME_STORAGE_KEY)||'dark';
+document.body.setAttribute('data-theme',initialTheme);
+updateThemeToggleLabel();
+function openRoboticsLab(){window.top.location.href='/OBS_ROBOTICS_LAB.html'}
+</script>
+</body>
+</html>
